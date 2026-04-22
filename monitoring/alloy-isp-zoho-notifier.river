@@ -1,0 +1,18 @@
+// Grafana Alloy river config — isp-zoho-notifier scrape
+// Déployer dans le ConfigMap du DaemonSet Alloy dans le namespace isp-monitoring
+
+prometheus.scrape "isp_zoho_notifier" {
+  targets = [
+    {
+      __address__ = "isp-zoho-notifier.isp-app.svc.cluster.local:8081",
+      __metrics_path__ = "/actuator/prometheus",
+      job = "isp-zoho-notifier",
+      namespace = "isp-app",
+    },
+  ]
+
+  scrape_interval = "30s"
+  scrape_timeout  = "10s"
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}

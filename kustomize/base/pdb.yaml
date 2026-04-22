@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: isp-zoho-notifier
+  namespace: isp-app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: isp-zoho-notifier

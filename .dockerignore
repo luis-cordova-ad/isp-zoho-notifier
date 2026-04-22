@@ -1,0 +1,12 @@
+target/
+.git/
+.github/
+.mvn/
+*.md
+doc/
+kustomize/
+monitoring/
+scripts/
+.env
+.env.example
+*.log

@@ -1,0 +1,97 @@
+{
+  "title": "ISP Zoho Notifier",
+  "uid": "isp-zoho-notifier",
+  "tags": ["isp", "zoho", "amqp", "worker"],
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Events Received / min",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "rate(zoho_notifier_events_received_total{namespace=\"isp-app\"}[1m]) * 60",
+          "legendFormat": "Events/min"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "title": "Notifications Sent / min",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "rate(zoho_notifier_notifications_sent_total{namespace=\"isp-app\"}[1m]) * 60",
+          "legendFormat": "Sent/min"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+    },
+    {
+      "id": 3,
+      "title": "Notifications Failed / min",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "rate(zoho_notifier_notifications_failed_total{namespace=\"isp-app\"}[1m]) * 60",
+          "legendFormat": "Failed/min"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+    },
+    {
+      "id": 4,
+      "title": "DLQ Count",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "increase(zoho_notifier_dlq_count_total{namespace=\"isp-app\"}[1h])",
+          "legendFormat": "DLQ/h"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+    },
+    {
+      "id": 5,
+      "title": "Zoho API Duration P95 (seconds)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(zoho_notifier_api_duration_seconds_bucket{namespace=\"isp-app\"}[5m]))",
+          "legendFormat": "P95 {{action}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+    },
+    {
+      "id": 6,
+      "title": "Notifications by Action",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(zoho_notifier_notifications_sent_total{namespace=\"isp-app\"}[5m])",
+          "legendFormat": "Sent {{action}}"
+        },
+        {
+          "expr": "rate(zoho_notifier_notifications_failed_total{namespace=\"isp-app\"}[5m])",
+          "legendFormat": "Failed {{action}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+    },
+    {
+      "id": 7,
+      "title": "Token Refresh Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(zoho_notifier_token_refresh_count_total{namespace=\"isp-app\"}[5m])",
+          "legendFormat": "Token refreshes/s"
+        }
+      ],
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 12}
+    }
+  ]
+}

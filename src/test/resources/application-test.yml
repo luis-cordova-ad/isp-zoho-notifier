@@ -1,0 +1,61 @@
+spring:
+  cloud:
+    kubernetes:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+      reload:
+        enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9999/realms/test
+          jwk-set-uri: http://localhost:9999/realms/test/protocol/openid-connect/certs
+          resource-id: isp-zoho-notifier-test
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.MariaDBDialect
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  rabbitmq:
+    host: ${spring.rabbitmq.host:localhost}
+    port: ${spring.rabbitmq.port:5672}
+    username: guest
+    password: guest
+
+server:
+  port: 0
+
+management:
+  server:
+    port: 0
+
+zoho:
+  client-id: test-client-id
+  client-secret: test-client-secret
+  refresh-token: test-refresh-token
+  api-base-url: http://localhost:${wiremock.server.port:8089}
+  auth-url: http://localhost:${wiremock.server.port:8089}
+  retry-max-attempts: 2
+  retry-initial-wait-ms: 100
+  webhook-enabled: true
+
+graylog:
+  gelf:
+    host: localhost
+    port: 12201
+
+isp:
+  security:
+    jwt:
+      claim-roles: realm_access.roles
+      claim-scope: scope
+
+logging:
+  level:
+    root: WARN
+    com.isp.zoho.notifier: DEBUG

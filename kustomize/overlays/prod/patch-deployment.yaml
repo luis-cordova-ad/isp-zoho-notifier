@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: isp-zoho-notifier
+  namespace: isp-app
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: isp-zoho-notifier
+          resources:
+            requests:
+              cpu: 200m
+              memory: 384Mi
+            limits:
+              cpu: 1000m
+              memory: 768Mi

@@ -1,0 +1,289 @@
+PROPRIETARY SOFTWARE LICENSE AGREEMENT
+================================================================================
+Copyright (c) 2024-2026 Korlu Solutions Digitales inc.
+All Rights Reserved.
+================================================================================
+
+IMPORTANT — READ CAREFULLY BEFORE USING, COPYING, OR DISTRIBUTING THIS SOFTWARE
+
+This Proprietary Software License Agreement ("Agreement") is a legally binding
+agreement between you ("Licensee") and Korlu Solutions Digitales inc., a
+corporation incorporated under the laws of Quebec, Canada ("Licensor").
+
+By accessing, downloading, installing, copying, or otherwise using all or any
+portion of the Covered Work (as defined herein), you agree to be bound by the
+terms of this Agreement. If you do not agree to these terms, you must
+immediately cease all access and destroy all copies in your possession.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 1 — DEFINITIONS
+────────────────────────────────────────────────────────────────────────────────
+
+1.1  "Licensor" means Korlu Solutions Digitales inc. and its successors.
+
+1.2  "Covered Work" means exclusively the original work authored, created, or
+     contributed by or on behalf of Korlu Solutions Digitales inc., including
+     but not limited to:
+       (a) custom source code written by or for Licensor;
+       (b) configuration files, scripts, and automation authored by Licensor;
+       (c) infrastructure definitions, deployment manifests, and orchestration
+           files created by Licensor;
+       (d) integration logic, business processes, and workflows designed by
+           Licensor;
+       (e) modifications, customizations, and adaptations applied by Licensor
+           to Third-Party Software (as defined in Article 1.4);
+       (f) documentation, architecture designs, and technical specifications
+           authored by Licensor.
+
+1.3  "Authorized Contributor" means any natural person or automated tool
+     (including but not limited to artificial intelligence assistants, code
+     analysis tools, and automated scanners) that accesses or modifies the
+     Covered Work exclusively under one of the following conditions:
+       (a) the person is a current employee of Korlu Solutions Digitales inc.
+           acting within the scope of their employment;
+       (b) the person is an officer or director of Korlu Solutions Digitales
+           inc.;
+       (c) the person or entity has been expressly mandated in writing by Korlu
+           Solutions Digitales inc. to perform work on its behalf (including
+           contractors, consultants, and mandated service providers);
+       (d) the automated tool is operated exclusively by and under the direct
+           control of a person described in (a), (b), or (c) above.
+
+1.4  "Third-Party Software" means any software, framework, library, tool,
+     application, or component that was developed independently by parties
+     other than Licensor, regardless of whether it is open source, freeware,
+     or commercially licensed. Third-Party Software includes, without
+     limitation, open source projects, operating systems, container runtimes,
+     orchestration platforms, databases, messaging systems, and monitoring
+     tools incorporated or referenced within this repository.
+
+1.5  "Licensee" means any individual or entity that accesses, downloads,
+     copies, or uses the Covered Work, other than an Authorized Contributor
+     acting within the scope of their mandate.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 2 — SCOPE — WHAT IS AND IS NOT COVERED
+────────────────────────────────────────────────────────────────────────────────
+
+2.1  COVERED WORK. This Agreement applies exclusively to the Covered Work as
+     defined in Article 1.2. All intellectual property rights in the Covered
+     Work are owned exclusively by Korlu Solutions Digitales inc.
+
+2.2  THIRD-PARTY SOFTWARE EXCLUSION. This Agreement does not apply to, does
+     not restrict, and does not claim ownership over any Third-Party Software.
+     Third-Party Software incorporated into or referenced by this repository
+     remains the property of its respective authors or rights holders and is
+     subject exclusively to its own applicable license terms. The presence of
+     Third-Party Software in this repository does not constitute a claim of
+     ownership by Licensor over such software.
+
+2.3  MODIFICATIONS TO THIRD-PARTY SOFTWARE. Where Licensor has applied
+     modifications, configurations, customizations, patches, or integrations
+     to Third-Party Software, only those specific modifications and
+     customizations constitute Covered Work and are protected under this
+     Agreement. The underlying Third-Party Software remains subject to its
+     own license.
+
+2.4  COEXISTENCE OF LICENSES. In the event of a conflict between this
+     Agreement and the license of any Third-Party Software included herein,
+     the Third-Party Software's license governs with respect to that software,
+     and this Agreement governs with respect to the Covered Work.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 3 — AUTHORIZED CONTRIBUTORS — RIGHT TO MODIFY
+────────────────────────────────────────────────────────────────────────────────
+
+3.1  EXCLUSIVE RIGHT TO MODIFY. Only Authorized Contributors, as defined in
+     Article 1.3, have the right to access, modify, commit, deploy, or
+     otherwise alter the Covered Work. Any access to or modification of the
+     Covered Work by any person or entity that does not qualify as an
+     Authorized Contributor is strictly prohibited and constitutes an
+     infringement of Licensor's rights.
+
+3.2  AUTOMATED TOOLS. The use of automated tools, including artificial
+     intelligence assistants, code generation systems, code scanning tools,
+     static analysis tools, and similar systems, is permitted solely when such
+     tools are operated by and under the direct control of an Authorized
+     Contributor acting within the scope of their mandate from Korlu Solutions
+     Digitales inc. The use of such tools by any other party on the Covered
+     Work is strictly prohibited.
+
+3.3  CONTRIBUTIONS BECOME PROPERTY OF LICENSOR. Any modification, addition,
+     or contribution made to the Covered Work by an Authorized Contributor in
+     the course of their employment or mandate shall automatically become the
+     exclusive property of Korlu Solutions Digitales inc. upon creation,
+     without further act or assignment, to the fullest extent permitted by
+     applicable law.
+
+3.4  END OF MANDATE. Upon termination of employment, contract, or mandate,
+     an Authorized Contributor's right to access or modify the Covered Work
+     immediately and automatically ceases. All copies in the former Authorized
+     Contributor's possession must be returned or destroyed.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 4 — RESTRICTIONS ON LICENSEES
+────────────────────────────────────────────────────────────────────────────────
+
+4.1  NO LICENSE GRANTED. This Agreement does not grant Licensee any license,
+     right, or permission to use, copy, reproduce, modify, adapt, translate,
+     distribute, sublicense, sell, rent, lease, publicly display, publicly
+     perform, transmit, or create derivative works of the Covered Work, whether
+     in whole or in part, without the prior express written authorization of an
+     authorized officer of Korlu Solutions Digitales inc.
+
+4.2  PROHIBITION ON REPRODUCTION. The reproduction of the Covered Work, in
+     whole or in part, in any form or by any means — electronic, mechanical,
+     digital, optical, or otherwise — is strictly prohibited without prior
+     written authorization from Licensor.
+
+4.3  PROHIBITION ON DISTRIBUTION. Licensee shall not distribute, publish,
+     disclose, or make available the Covered Work or any portion thereof to
+     any third party without prior written authorization from Licensor.
+
+4.4  PROHIBITION ON REVERSE ENGINEERING. Licensee shall not reverse engineer,
+     decompile, disassemble, or otherwise attempt to derive the source code,
+     underlying algorithms, or structure of the Covered Work.
+
+4.5  PROHIBITION ON DERIVATIVE WORKS. Licensee shall not create any work
+     based on, derived from, or incorporating any portion of the Covered Work
+     without the prior written consent of Licensor.
+
+4.6  PROHIBITION ON COMMERCIAL USE. Any commercial use of the Covered Work,
+     including incorporation into a product or service, is strictly prohibited
+     without a separate written commercial license agreement executed by
+     Licensor.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 5 — CONFIDENTIALITY
+────────────────────────────────────────────────────────────────────────────────
+
+5.1  The Covered Work constitutes confidential and proprietary information of
+     Licensor. Licensee agrees to maintain the confidentiality of the Covered
+     Work using at least the same degree of care used to protect its own
+     confidential information, but in no event less than reasonable care.
+
+5.2  Licensee shall not disclose any portion of the Covered Work to any third
+     party without the prior written consent of Licensor.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 6 — ENFORCEMENT AND REMEDIES
+────────────────────────────────────────────────────────────────────────────────
+
+6.1  MONETARY DAMAGES. Any unauthorized use, reproduction (partial or total),
+     distribution, modification, or any other infringement of the rights set
+     forth in this Agreement shall entitle Licensor to claim monetary damages,
+     including but not limited to:
+       (a) actual damages suffered as a result of the infringement;
+       (b) all profits derived by Licensee from the unauthorized use;
+       (c) statutory damages as provided under applicable law;
+       (d) punitive or exemplary damages where permitted by law;
+       (e) all reasonable legal fees, court costs, and expenses incurred by
+           Licensor in enforcing its rights.
+
+6.2  INJUNCTIVE RELIEF. Licensee acknowledges that any breach of this
+     Agreement would cause irreparable harm to Licensor for which monetary
+     damages would be an inadequate remedy, and that Licensor shall be entitled
+     to seek equitable relief, including injunction and specific performance,
+     without the requirement of posting a bond or other security.
+
+6.3  CUMULATIVE REMEDIES. The remedies set forth in this Agreement are
+     cumulative and not exclusive of any other rights or remedies available to
+     Licensor at law or in equity.
+
+6.4  INTERNATIONAL ENFORCEMENT. Licensor reserves the right to enforce its
+     intellectual property rights in any jurisdiction worldwide in accordance
+     with applicable local law and international intellectual property treaties,
+     including the Berne Convention (181 member states), the TRIPS Agreement,
+     and the WIPO Copyright Treaty.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 7 — INTELLECTUAL PROPERTY NOTICES
+────────────────────────────────────────────────────────────────────────────────
+
+7.1  Licensee shall not remove, alter, or obscure any copyright notice,
+     trademark, proprietary legend, or other intellectual property notice
+     contained in or on the Covered Work.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 8 — DISCLAIMER OF WARRANTIES
+────────────────────────────────────────────────────────────────────────────────
+
+8.1  THE COVERED WORK IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+     EXPRESS OR IMPLIED. LICENSOR DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT
+     LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+     AND NON-INFRINGEMENT.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 9 — LIMITATION OF LIABILITY
+────────────────────────────────────────────────────────────────────────────────
+
+9.1  IN NO EVENT SHALL LICENSOR BE LIABLE TO LICENSEE FOR ANY INDIRECT,
+     INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING OUT OF
+     OR RELATED TO THIS AGREEMENT OR THE COVERED WORK, EVEN IF LICENSOR HAS
+     BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 10 — GOVERNING LAW AND JURISDICTION
+────────────────────────────────────────────────────────────────────────────────
+
+10.1 This Agreement shall be governed by and construed in accordance with the
+     laws of the Province of Quebec and the federal laws of Canada applicable
+     therein, without regard to conflict of law principles.
+
+10.2 Any dispute arising out of or relating to this Agreement shall be subject
+     to the exclusive jurisdiction of the courts of the Province of Quebec,
+     Canada. Licensee hereby irrevocably consents to such jurisdiction.
+
+10.3 The United Nations Convention on Contracts for the International Sale of
+     Goods (CISG) does not apply to this Agreement.
+
+────────────────────────────────────────────────────────────────────────────────
+ARTICLE 11 — GENERAL PROVISIONS
+────────────────────────────────────────────────────────────────────────────────
+
+11.1 ENTIRE AGREEMENT. This Agreement constitutes the entire agreement between
+     the parties with respect to the Covered Work and supersedes all prior or
+     contemporaneous understandings, negotiations, or agreements.
+
+11.2 SEVERABILITY. If any provision of this Agreement is found to be invalid
+     or unenforceable, the remaining provisions shall continue in full force
+     and effect.
+
+11.3 NO WAIVER. Failure by Licensor to enforce any provision of this Agreement
+     shall not constitute a waiver of its right to enforce such provision in
+     the future.
+
+11.4 WRITTEN AUTHORIZATION REQUIRED. Any exception to the restrictions set
+     forth in this Agreement must be obtained in writing and signed by an
+     authorized officer of Korlu Solutions Digitales inc. No oral
+     representations or informal communications shall constitute authorization.
+
+11.5 LANGUAGE. The parties have agreed that this Agreement be drafted in
+     English. Les parties ont convenu que cette entente soit rédigée en anglais.
+     In the event of any conflict between an English version and a translation
+     of this Agreement, the English version shall prevail.
+
+────────────────────────────────────────────────────────────────────────────────
+CONTACT FOR LICENSING INQUIRIES
+────────────────────────────────────────────────────────────────────────────────
+
+To obtain written authorization or inquire about licensing, contact:
+
+  Korlu Solutions Digitales inc.
+  Legal Department — Licensing
+  Quebec, Canada
+
+  All licensing requests must be submitted in writing.
+
+================================================================================
+Copyright (c) 2024-2026 Korlu Solutions Digitales inc. All Rights Reserved.
+
+This license covers exclusively the original work created by or on behalf of
+Korlu Solutions Digitales inc. Third-party open source software referenced or
+included herein remains the property of its respective authors and is governed
+by its own license terms.
+
+Unauthorized use, reproduction, or distribution of the Covered Work, in whole
+or in part, is strictly prohibited and will result in civil and/or criminal
+prosecution to the fullest extent permitted by law.
+================================================================================

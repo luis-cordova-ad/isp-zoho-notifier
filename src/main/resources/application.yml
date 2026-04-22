@@ -1,0 +1,137 @@
+spring:
+  application:
+    name: isp-zoho-notifier
+  cloud:
+    kubernetes:
+      discovery:
+        enabled: true
+      reload:
+        enabled: true
+        strategy: refresh
+        period: 30000
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+          resource-id: isp-zoho-notifier
+  datasource:
+    hikari:
+      data-source-class-name: org.mariadb.jdbc.MariaDbDataSource
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      validation-timeout: 5000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      data-source-properties:
+        serverName: ${DB_HOST}
+        port: ${DB_PORT:6033}
+        databaseName: ${DB_NAME:freeradius_db}
+        user: ${DB_USER:isp_zoho_notifier}
+        password: ${DB_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+    open-in-view: false
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    out-of-order: false
+    table: flyway_schema_history
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 10
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: 8080
+  forward-headers-strategy: FRAMEWORK
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health, info, prometheus, loggers
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms, 100ms, 200ms, 500ms, 1s, 2s
+    tags:
+      service: isp-zoho-notifier
+      namespace: ${KUBERNETES_NAMESPACE:local}
+
+graylog:
+  gelf:
+    host: ${GRAYLOG_GELF_HOST:graylog.graylog.svc.cluster.local}
+    port: ${GRAYLOG_GELF_PORT:12201}
+
+zoho:
+  client-id: ${ZOHO_CLIENT_ID}
+  client-secret: ${ZOHO_CLIENT_SECRET}
+  refresh-token: ${ZOHO_REFRESH_TOKEN}
+  api-base-url: ${ZOHO_API_BASE_URL:https://www.zohoapis.com}
+  auth-url: ${ZOHO_AUTH_URL:https://accounts.zoho.com}
+  retry-max-attempts: ${ZOHO_RETRY_MAX_ATTEMPTS:3}
+  retry-initial-wait-ms: ${ZOHO_RETRY_INITIAL_WAIT_MS:2000}
+  webhook-enabled: ${ZOHO_WEBHOOK_ENABLED:false}
+
+isp:
+  security:
+    jwt:
+      claim-roles: realm_access.roles
+      claim-scope: scope
+
+resilience4j:
+  retry:
+    instances:
+      zoho-crm:
+        max-attempts: 3
+        wait-duration: 2s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 5
+        retry-exceptions:
+          - com.isp.zoho.notifier.exception.ZohoClientException
+          - org.springframework.web.client.HttpServerErrorException
+          - java.net.ConnectException
+          - java.util.concurrent.TimeoutException
+        ignore-exceptions:
+          - com.isp.zoho.notifier.exception.ZohoClientException
+  circuitbreaker:
+    instances:
+      zoho-crm:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3

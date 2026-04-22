@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: isp-app
+
+resources:
+  - ../../base
+
+images:
+  - name: harbor.isp.local/isp-prod/isp-zoho-notifier
+    newTag: latest
+
+patches:
+  - path: patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: isp-zoho-notifier
+  - path: patch-hpa.yaml
+    target:
+      kind: HorizontalPodAutoscaler
+      name: isp-zoho-notifier
+
+configMapGenerator:
+  - name: isp-zoho-notifier-config
+    files:
+      - application.properties=../../config/dev/isp-zoho-notifier.properties
+    options:
+      disableNameSuffixHash: true
+
+generatorOptions:
+  disableNameSuffixHash: true

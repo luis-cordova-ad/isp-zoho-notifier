@@ -1,0 +1,112 @@
+version: "3"
+
+vars:
+  ARTIFACT_ID: isp-zoho-notifier
+  IMAGE_REGISTRY: harbor.isp.local/isp-prod/{{.ARTIFACT_ID}}
+  NAMESPACE_DEV: isp-app
+  KUSTOMIZE_VERSION: 5.7.1
+
+tasks:
+
+  compile:
+    desc: "Compilation rapide sans tests"
+    cmds:
+      - mvn compile -q
+
+  build:
+    desc: "Compile + tous les tests + JaCoCo 70%/60%"
+    cmds:
+      - mvn verify
+
+  test:
+    desc: "Exécuter les tests uniquement"
+    cmds:
+      - mvn test
+
+  lint:
+    desc: "Checkstyle Google Java Style"
+    cmds:
+      - mvn checkstyle:check
+
+  coverage:
+    desc: "Ouvrir le rapport JaCoCo"
+    cmds:
+      - cmd: start target/site/jacoco/index.html
+        platforms: [windows]
+      - cmd: open target/site/jacoco/index.html
+        platforms: [darwin]
+      - cmd: xdg-open target/site/jacoco/index.html
+        platforms: [linux]
+
+  semgrep:scan:
+    desc: "Scanner SAST avec Semgrep"
+    cmds:
+      - semgrep --config .semgrep.yml src/main/java/ --error
+
+  docker:build:
+    desc: "Construire l'image Docker locale avec attestations SBOM"
+    deps: [semgrep:scan]
+    cmds:
+      - mvn package -DskipTests -q
+      - docker buildx build
+          --sbom=true
+          --provenance=mode=max
+          --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          --label "org.opencontainers.image.revision=$(git rev-parse --short HEAD)"
+          --load
+          -t {{.IMAGE_REGISTRY}}:local
+          .
+
+  docker:push:
+    desc: "Push l'image vers Harbor avec tag commit"
+    cmds:
+      - docker buildx build
+          --sbom=true
+          --provenance=mode=max
+          --label "org.opencontainers.image.revision=$(git rev-parse --short HEAD)"
+          --push
+          -t {{.IMAGE_REGISTRY}}:$(git rev-parse --short HEAD)
+          -t {{.IMAGE_REGISTRY}}:latest
+          .
+
+  docker:
+    desc: "Alias pour docker:build"
+    deps: [docker:build]
+
+  k8s-dev:
+    desc: "Dry-run Kustomize overlay dev"
+    cmds:
+      - kustomize build kustomize/overlays/dev | kubectl apply --dry-run=client -f -
+
+  k8s-prod:
+    desc: "Dry-run Kustomize overlay prod"
+    cmds:
+      - kustomize build kustomize/overlays/prod | kubectl apply --dry-run=client -f -
+
+  deploy-dev:
+    desc: "Déployer sur le cluster DEV"
+    cmds:
+      - kustomize build kustomize/overlays/dev | kubectl apply -f -
+      - kubectl rollout status deployment/{{.ARTIFACT_ID}} -n {{.NAMESPACE_DEV}} --timeout=300s
+
+  deploy-prod:
+    desc: "Déployer sur le cluster PROD (interactif)"
+    cmds:
+      - echo "Deploying {{.ARTIFACT_ID}} to PROD — make sure KUBECONFIG_PROD is set"
+      - kustomize build kustomize/overlays/prod | kubectl apply -f -
+      - kubectl rollout status deployment/{{.ARTIFACT_ID}} -n isp-app --timeout=600s
+
+  run:
+    desc: "Démarrer localement avec profil dev (nécessite .env configuré)"
+    cmds:
+      - mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+  clean:
+    desc: "Nettoyer le build Maven"
+    cmds:
+      - mvn clean
+
+  trivy:scan:
+    desc: "Scan CVE Trivy sur l'image locale"
+    cmds:
+      - trivy image --severity CRITICAL,HIGH {{.IMAGE_REGISTRY}}:local

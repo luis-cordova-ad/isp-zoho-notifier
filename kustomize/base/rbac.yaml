@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: isp-zoho-notifier-role
+rules:
+  - apiGroups: [""]
+    resources: [services, endpoints, pods, namespaces, configmaps]
+    verbs: [get, list, watch]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: isp-zoho-notifier-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: isp-zoho-notifier-role
+subjects:
+  - kind: ServiceAccount
+    name: isp-zoho-notifier
+    namespace: isp-app

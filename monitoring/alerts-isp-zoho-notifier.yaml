@@ -1,0 +1,73 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: isp-zoho-notifier-alerts
+  namespace: isp-app
+  labels:
+    app: isp-zoho-notifier
+    release: prometheus
+spec:
+  groups:
+    - name: isp-zoho-notifier
+      interval: 30s
+      rules:
+        - alert: ZohoNotifierHighDlqRate
+          expr: |
+            increase(zoho_notifier_dlq_count_total[5m]) > 5
+          for: 2m
+          labels:
+            severity: warning
+            service: isp-zoho-notifier
+          annotations:
+            summary: "High DLQ rate on isp-zoho-notifier"
+            description: "More than 5 events sent to DLQ in the last 5 minutes."
+            runbook_url: "https://wiki.internal.korlu.com/runbooks/isp-zoho-notifier/dlq-full"
+
+        - alert: ZohoNotifierHighFailureRate
+          expr: |
+            rate(zoho_notifier_notifications_failed_total[10m]) > 0.1
+          for: 5m
+          labels:
+            severity: critical
+            service: isp-zoho-notifier
+          annotations:
+            summary: "High notification failure rate"
+            description: "Zoho CRM notification failure rate exceeds 10% over 10 minutes."
+            runbook_url: "https://wiki.internal.korlu.com/runbooks/isp-zoho-notifier/zoho-api-down"
+
+        - alert: ZohoNotifierTokenRefreshFrequent
+          expr: |
+            increase(zoho_notifier_token_refresh_count_total[10m]) > 5
+          for: 5m
+          labels:
+            severity: warning
+            service: isp-zoho-notifier
+          annotations:
+            summary: "Frequent Zoho token refreshes"
+            description: "Token is being refreshed more than 5 times in 10 minutes — possible cache issue or short TTL."
+            runbook_url: "https://wiki.internal.korlu.com/runbooks/isp-zoho-notifier/token-expired"
+
+        - alert: ZohoNotifierPodDown
+          expr: |
+            up{job="isp-zoho-notifier"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: isp-zoho-notifier
+          annotations:
+            summary: "isp-zoho-notifier pod is down"
+            description: "Prometheus cannot scrape isp-zoho-notifier for more than 1 minute."
+
+        - alert: ZohoNotifierApiSlowResponse
+          expr: |
+            histogram_quantile(0.95,
+              rate(zoho_notifier_api_duration_seconds_bucket[5m])
+            ) > 10
+          for: 5m
+          labels:
+            severity: warning
+            service: isp-zoho-notifier
+          annotations:
+            summary: "Slow Zoho CRM API responses"
+            description: "P95 response time for Zoho API calls exceeds 10 seconds."
+            runbook_url: "https://wiki.internal.korlu.com/runbooks/isp-zoho-notifier/zoho-api-down"

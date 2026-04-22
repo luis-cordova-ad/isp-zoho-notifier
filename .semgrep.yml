@@ -1,0 +1,61 @@
+rules:
+  - id: no-system-out
+    patterns:
+      - pattern: System.out.println(...)
+    message: "Use SLF4J logger instead of System.out.println"
+    languages: [java]
+    severity: ERROR
+
+  - id: no-silent-catch
+    patterns:
+      - pattern: |
+          catch (...) {
+          }
+    message: "Empty catch block: always log or rethrow the exception"
+    languages: [java]
+    severity: WARNING
+
+  - id: no-hardcoded-password
+    patterns:
+      - pattern-regex: '(?i)(password|passwd|secret|token)\s*=\s*"[^${}][^"]{3,}"'
+    message: "Hardcoded credential detected — use environment variables or K8s secrets"
+    languages: [java]
+    severity: ERROR
+
+  - id: no-log-sensitive-data
+    patterns:
+      - pattern: |
+          log.$METHOD(..., $X, ...) where:
+            - metavariable-regex:
+                metavariable: $X
+                regex: (?i)(token|secret|password|clientSecret)
+    message: "Do not log sensitive data (token, secret, password)"
+    languages: [java]
+    severity: ERROR
+
+  - id: no-field-injection
+    patterns:
+      - pattern: |
+          @Autowired
+          private $TYPE $FIELD;
+    message: "Use constructor injection instead of @Autowired field injection"
+    languages: [java]
+    severity: WARNING
+
+  - id: jpa-entity-in-controller
+    patterns:
+      - pattern: |
+          @RestController
+          class $CTRL {
+            ...
+            ResponseEntity<$ENTITY> $METHOD(...) { ... }
+          }
+      - pattern-not: |
+          @RestController
+          class $CTRL {
+            ...
+            ResponseEntity<$ENTITY> $METHOD(...) { ... }
+          }
+    message: "Do not expose JPA entities directly from controllers — use DTOs"
+    languages: [java]
+    severity: WARNING

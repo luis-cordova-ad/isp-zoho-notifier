@@ -1,0 +1,234 @@
+# NetworkPolicy — default-deny + allow explicites pour isp-zoho-notifier
+# Worker AMQP interne — pas de route gateway publique par défaut
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Ingress
+  ingress: []
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-egress
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress: []
+
+---
+# Ingress depuis isp-api-gateway (optionnel — si ZOHO_WEBHOOK_ENABLED=true)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-gateway
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: isp-edge
+      ports:
+        - port: 8080
+          protocol: TCP
+
+---
+# Ingress depuis Prometheus (port management 8081)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 8081
+          protocol: TCP
+
+---
+# Egress vers RabbitMQ (isp-messaging, port 5672) — consommation provisioning.events
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-rabbitmq
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: isp-messaging
+      ports:
+        - port: 5672
+          protocol: TCP
+
+---
+# Egress vers ProxySQL / freeradius_db (svc-data-persistence, port 6033)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-proxysql
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: isp-app
+          podSelector:
+            matchLabels:
+              app: proxysql
+      ports:
+        - port: 6033
+          protocol: TCP
+
+---
+# Egress vers Zoho API Internet (HTTPS 443) — obligatoire pour les notifications
+# ⚠️ Egress Internet explicitement déclaré pour api.zoho.com et accounts.zoho.com
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-zoho-internet
+  namespace: isp-app
+  annotations:
+    description: "Allows egress to Zoho CRM API (api.zoho.com) and OAuth2 (accounts.zoho.com)"
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - port: 443
+          protocol: TCP
+
+---
+# Egress vers Keycloak (isp-iam, ports 80/8080/8443) — validation JWT webhook
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-keycloak
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: isp-iam
+      ports:
+        - port: 80
+          protocol: TCP
+        - port: 8080
+          protocol: TCP
+        - port: 8443
+          protocol: TCP
+
+---
+# Egress vers Graylog GELF (namespace monitoring, port 12201 UDP+TCP)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-graylog
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 12201
+          protocol: UDP
+        - port: 12201
+          protocol: TCP
+
+---
+# Egress vers DNS (kube-system, port 53)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-dns
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+---
+# Egress vers K8s API server (port 6443) — spring-cloud-kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-k8s-api
+  namespace: isp-app
+spec:
+  podSelector:
+    matchLabels:
+      app: isp-zoho-notifier
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - port: 6443
+          protocol: TCP

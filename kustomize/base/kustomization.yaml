@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: isp-app
+
+resources:
+  - serviceaccount.yaml
+  - rbac.yaml
+  - deployment.yaml
+  - service.yaml
+  - networkpolicy.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - servicemonitor.yaml
+
+commonLabels:
+  app: isp-zoho-notifier
+  app.kubernetes.io/name: isp-zoho-notifier
+  app.kubernetes.io/part-of: isp-platform

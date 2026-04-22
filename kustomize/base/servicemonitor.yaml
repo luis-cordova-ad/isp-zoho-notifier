@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: isp-zoho-notifier
+  namespace: isp-app
+  labels:
+    app: isp-zoho-notifier
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: isp-zoho-notifier
+  namespaceSelector:
+    matchNames:
+      - isp-app
+  endpoints:
+    - port: management
+      path: /actuator/prometheus
+      interval: 30s
+      scrapeTimeout: 10s

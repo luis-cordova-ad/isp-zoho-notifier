@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <springProperty scope="context" name="APP_NAME"      source="spring.application.name"   defaultValue="isp-zoho-notifier"/>
+  <springProperty scope="context" name="ACTIVE_PROFILE" source="spring.profiles.active"   defaultValue="local"/>
+  <springProperty scope="context" name="GRAYLOG_HOST"  source="graylog.gelf.host"         defaultValue="graylog.graylog.svc.cluster.local"/>
+  <springProperty scope="context" name="GRAYLOG_PORT"  source="graylog.gelf.port"         defaultValue="12201"/>
+
+  <!-- ── STDOUT : JSON structuré (logstash-logback-encoder) ─────────────────── -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <customFields>{"service":"${APP_NAME}","env":"${ACTIVE_PROFILE}"}</customFields>
+      <includeMdcKeyName>correlationId</includeMdcKeyName>
+      <includeMdcKeyName>traceId</includeMdcKeyName>
+      <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+        <maxDepthPerCause>8</maxDepthPerCause>
+        <shortenedClassNameLength>40</shortenedClassNameLength>
+        <exclude>sun\.reflect\..*</exclude>
+      </throwableConverter>
+    </encoder>
+  </appender>
+
+  <!-- ── GELF_AUDIT : Graylog UDP pour audit ────────────────────────────────── -->
+  <appender name="GELF_AUDIT" class="de.siegmar.logbackgelf.GelfUdpAppender">
+    <graylogHost>${GRAYLOG_HOST}</graylogHost>
+    <graylogPort>${GRAYLOG_PORT}</graylogPort>
+    <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+      <additionalField>
+        <key>_service</key>
+        <value>${APP_NAME}</value>
+      </additionalField>
+      <additionalField>
+        <key>_tag</key>
+        <value>CRTC_AUDIT_READY</value>
+      </additionalField>
+      <additionalField>
+        <key>_index_set</key>
+        <value>crtc-audit-base</value>
+      </additionalField>
+      <includeRawMessage>false</includeRawMessage>
+    </encoder>
+    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+      <evaluator class="ch.qos.logback.classic.boolex.MDCValueListEventEvaluator">
+        <keyValuePair>
+          <key>audit</key>
+          <value>true</value>
+        </keyValuePair>
+      </evaluator>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+  </appender>
+
+  <!-- ── GELF_SECURITY : Graylog UDP pour événements sécurité ──────────────── -->
+  <appender name="GELF_SECURITY" class="de.siegmar.logbackgelf.GelfUdpAppender">
+    <graylogHost>${GRAYLOG_HOST}</graylogHost>
+    <graylogPort>${GRAYLOG_PORT}</graylogPort>
+    <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+      <additionalField>
+        <key>_service</key>
+        <value>${APP_NAME}</value>
+      </additionalField>
+      <additionalField>
+        <key>_tag</key>
+        <value>SECURITY_EVENT</value>
+      </additionalField>
+      <additionalField>
+        <key>_index_set</key>
+        <value>security-events</value>
+      </additionalField>
+      <includeRawMessage>false</includeRawMessage>
+    </encoder>
+    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+      <evaluator class="ch.qos.logback.classic.boolex.MDCValueListEventEvaluator">
+        <keyValuePair>
+          <key>securityEvent</key>
+          <value>true</value>
+        </keyValuePair>
+      </evaluator>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+  </appender>
+
+  <!-- ── Loggers ─────────────────────────────────────────────────────────────── -->
+  <logger name="AUDIT"    level="INFO" additivity="false">
+    <appender-ref ref="GELF_AUDIT"/>
+    <appender-ref ref="STDOUT"/>
+  </logger>
+
+  <logger name="SECURITY" level="INFO" additivity="false">
+    <appender-ref ref="GELF_SECURITY"/>
+    <appender-ref ref="STDOUT"/>
+  </logger>
+
+  <logger name="com.isp.zoho.notifier" level="INFO" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+
+  <logger name="org.springframework.amqp" level="WARN" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>
