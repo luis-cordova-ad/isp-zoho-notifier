@@ -1,6 +1,5 @@
-package com.isp.zoho.notifier.config;
+﻿package com.isp.zoho.notifier.config;
 
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -32,7 +31,7 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> {
-          auth.requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll();
+          auth.requestMatchers("/actuator/**").permitAll();
           if (zohoProperties.webhookEnabled()) {
             auth.requestMatchers("/api/v1/notify/**")
                 .hasAuthority("SCOPE_isp:zoho:notify");

@@ -22,25 +22,14 @@ RUN java -Djarmode=layertools \
          -jar target/isp-zoho-notifier-*.jar extract \
          --destination extracted
 
-# ── Stage 2 : Runtime ─────────────────────────────────────────────────────────
-# Tag patch exact — Ubuntu 22.04 LTS, dpkg metadata complète → Harbor SBOM OK
-FROM eclipse-temurin:25.0.2_7-jre-jammy
+# ── Stage 2 : Runtime — Golden Java 25 Runtime Base ────────────────────────────
+FROM harbor.internal.korlu.com/korlu/java-runtime-base:25-jammy-1.0.0
 
-# Métadonnées OCI (obligatoires pour Harbor SBOM + Argo CD)
 LABEL org.opencontainers.image.title="isp-zoho-notifier"
 LABEL org.opencontainers.image.description="isp-zoho-notifier — ISP Platform AMQP worker Zoho CRM"
 LABEL org.opencontainers.image.vendor="Korlu ISP Platform"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
-LABEL org.opencontainers.image.base.name="eclipse-temurin:25.0.2_7-jre-jammy"
-
-# Patcher les CVE Ubuntu — apt laisse les metadata dpkg intactes
-RUN apt-get update \
- && apt-get upgrade -y --no-install-recommends \
- && rm -rf /var/lib/apt/lists/*
-
-# Utilisateur non-root (convention distroless UID 65532)
-RUN groupadd -g 65532 nonroot \
- && useradd  -u 65532 -g nonroot -s /bin/false -M nonroot
+LABEL org.opencontainers.image.base.name="harbor.internal.korlu.com/korlu/java-runtime-base:25-jammy-1.0.0"
 
 WORKDIR /app
 
@@ -55,11 +44,4 @@ EXPOSE 8081
 
 USER nonroot:nonroot
 
-# JVM exec form (pas sh -c) : SIGTERM géré directement par la JVM → shutdown propre K8s
-ENTRYPOINT ["java", \
-  "-XX:+UseContainerSupport", \
-  "-XX:MaxRAMPercentage=75.0", \
-  "-XX:+UseZGC", \
-  "-XX:+ExitOnOutOfMemoryError", \
-  "-Djava.security.egd=file:/dev/./urandom", \
-  "org.springframework.boot.loader.launch.JarLauncher"]
+# ENTRYPOINT hérité de la base golden

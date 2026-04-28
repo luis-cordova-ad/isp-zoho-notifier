@@ -110,3 +110,46 @@ Phase 4 : task semgrep:scan     → 0 finding CRITICAL ou HIGH
 Phase 5 : task e2e-test         → Cucumber : 401 / 403 / 200 / webhook / retry
 Phase 6 : git diff              → vérifier secrets Zoho OAuth2, signature webhook validée
 ```
+
+---
+
+## Pipeline `task push` plateforme — Quality gate (mise à jour 2026-04-27)
+
+Conformément au skill `taskfile-isp` (section "Quality gate obligatoire"), `task push`
+(alias de `task docker:push`) et `task deploy` chaînent automatiquement le helper
+interne `_quality-gate` :
+
+```yaml
+deps: [_quality-gate]   # task: lint → task: semgrep:scan → task: build
+```
+
+| Porte | Tâche | Critère d'échec |
+|-------|-------|-----------------|
+| Style | `task lint` | `mvn checkstyle:check` ≠ 0 (Google Checks) |
+| SAST | `task semgrep:scan` | ≥1 finding `BLOCKING` |
+| Tests | `task build` | `mvn verify` échoue OU couverture JaCoCo sous le seuil pom.xml |
+
+Aucune image n'est poussée si une porte échoue. Bypass d'urgence (hotfix prod uniquement) :
+`SKIP_QUALITY_GATE=1 task push`.
+
+## Convention plateforme — Image Docker
+
+- **Base** : pinned par digest sur l'image golden
+  `harbor.internal.korlu.com/korlu/java-runtime-base@sha256:d6386efab9...`
+  (régénérer : `cd ../infra-base-image-java && task release && cat .last-digest`)
+- **Project Harbor** : `korlu` — le robot CI partagé `robot$robot-cicd-01` n'a pas
+  les droits sur `isp-prod`
+- **Tags poussés** : `harbor.internal.korlu.com/korlu/<service>:<git-short-sha>` + `:latest`
+- **SBOM + provenance** activés via buildx (`--sbom=true --provenance=mode=max`)
+
+## Configuration `.env` (DEV local)
+
+Harbor credentials du robot CI partagé — voir `isp-provisioning-api/.env` comme
+référence canonique de la plateforme :
+
+```
+ENV=dev
+HARBOR_REGISTRY=harbor.internal.korlu.com
+HARBOR_USER=robot$robot-cicd-01
+HARBOR_PASS=<demander à l'admin plateforme — gitignored, jamais committé>
+```

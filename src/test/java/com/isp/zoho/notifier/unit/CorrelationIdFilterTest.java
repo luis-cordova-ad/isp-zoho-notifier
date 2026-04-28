@@ -1,4 +1,4 @@
-package com.isp.zoho.notifier.unit;
+﻿package com.isp.zoho.notifier.unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -31,7 +31,7 @@ class CorrelationIdFilterTest {
     MockHttpServletRequest request = new MockHttpServletRequest();
     MockHttpServletResponse response = new MockHttpServletResponse();
 
-    filter.doFilterInternal(request, response, (req, res) -> {
+    filter.doFilter(request, response, (req, res) -> {
       assertThat(MDC.get("correlationId")).isNotNull().isNotBlank();
     });
 
@@ -45,7 +45,7 @@ class CorrelationIdFilterTest {
     request.addHeader("X-Correlation-ID", "test-correlation-id");
     MockHttpServletResponse response = new MockHttpServletResponse();
 
-    filter.doFilterInternal(request, response, (req, res) -> {
+    filter.doFilter(request, response, (req, res) -> {
       assertThat(MDC.get("correlationId")).isEqualTo("test-correlation-id");
     });
 
@@ -57,7 +57,7 @@ class CorrelationIdFilterTest {
     MockHttpServletRequest request = new MockHttpServletRequest();
     MockHttpServletResponse response = new MockHttpServletResponse();
 
-    filter.doFilterInternal(request, response, (req, res) -> {});
+    filter.doFilter(request, response, (req, res) -> {});
 
     assertThat(MDC.get("correlationId")).isNull();
   }
@@ -68,7 +68,7 @@ class CorrelationIdFilterTest {
     request.addHeader("X-Correlation-ID", "   ");
     MockHttpServletResponse response = new MockHttpServletResponse();
 
-    filter.doFilterInternal(request, response, (req, res) -> {
+    filter.doFilter(request, response, (req, res) -> {
       String correlationId = MDC.get("correlationId");
       assertThat(correlationId).isNotBlank();
       assertThat(correlationId).isNotEqualTo("   ");

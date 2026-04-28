@@ -89,6 +89,9 @@ jobs:
     needs: [test, semgrep]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    permissions:
+      contents: read
+      id-token: write  # cosign keyless OIDC
     steps:
       - uses: actions/checkout@v4
 
@@ -113,7 +116,8 @@ jobs:
           password: ${{ secrets.HARBOR_PASSWORD }}
 
       - name: Build and push image
-        uses: docker/build-push-action@v5
+        id: docker-build
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -125,3 +129,24 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+
+      # ── Supply chain: verify golden base + sign this image ─
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Verify golden base image signature (infra-base-image-java)
+        env:
+          COSIGN_CERT_IDENTITY_REGEXP: ^https://github\.com/korlu-isp/infra-base-image-java/\.github/workflows/release\.yml@.*$
+          COSIGN_CERT_OIDC_ISSUER: https://token.actions.githubusercontent.com
+        run: |
+          cosign verify \
+            --certificate-identity-regexp "${COSIGN_CERT_IDENTITY_REGEXP}" \
+            --certificate-oidc-issuer "${COSIGN_CERT_OIDC_ISSUER}" \
+            harbor.isp.local/isp-prod/java-runtime-base:25-jammy-1.0.0
+
+      - name: Sign pushed image (cosign keyless)
+        env:
+          DIGEST: ${{ steps.docker-build.outputs.digest }}
+        run: |
+          cosign sign --yes \
+            "harbor.isp.local/isp-prod/isp-zoho-notifier@${DIGEST}"

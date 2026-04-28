@@ -1,35 +1,139 @@
 version: "3"
 
+# Compatible Git Bash (Windows), bash (Linux/macOS)
+# Outils requis : bash, git, java, mvn, docker, kubectl, kustomize, task
+set: ['e', 'pipefail']
+
 vars:
-  ARTIFACT_ID: isp-zoho-notifier
-  IMAGE_REGISTRY: harbor.isp.local/isp-prod/{{.ARTIFACT_ID}}
-  NAMESPACE_DEV: isp-app
-  KUSTOMIZE_VERSION: 5.7.1
+  SERVICE: isp-zoho-notifier
+  MVN:
+    sh: command -v ./mvnw 2>/dev/null || echo mvn
+  IMAGE: harbor.internal.korlu.com/isp-prod/isp-zoho-notifier
+  KUSTOMIZE: kustomize
+  NAMESPACE: isp-system   # identique pour tous les environnements
+  # ENV et KUBE_CONTEXT : défaut dev — surcharger dans .env pour qa/prod
+  ENV:
+    sh: echo "${ENV:-dev}"
+  KUBE_CONTEXT:
+    sh: echo "${KUBE_CONTEXT:-kubernetes-admin@kubernetes}"
+
+# Variables sensibles hors Git — copier .env.example → .env avant utilisation
+dotenv: [.env]
 
 tasks:
-
-  compile:
-    desc: "Compilation rapide sans tests"
+  default:
+    desc: "Afficher l'aide et la séquence d'exécution"
     cmds:
-      - mvn compile -q
+      - |
+        echo ""
+        echo "══════════════════════════════════════════════════════════"
+        echo "  {{.SERVICE}} — Taskfile ISP Platform"
+        echo "══════════════════════════════════════════════════════════"
+        echo ""
+        echo "  Séquence développeur :"
+        echo "    task check → task compile → task build → task run"
+        echo "    task clean      (nettoyer les artefacts)"
+        echo ""
+        echo "  Séquence publication :"
+        echo "    task build → task docker → task docker:push"
+        echo ""
+        echo "  Séquence déploiement K8s (ENV actif = {{.ENV}}) :"
+        echo "    task k8s          (dry-run overlay {{.ENV}})"
+        echo "    task deploy       (deploy overlay {{.ENV}})"
+        echo "  → pour qa/prod : définir ENV=qa|prod KUBE_CONTEXT IMAGE_TAG dans .env"
+        echo ""
+        echo "  Qualité / Sécurité :"
+        echo "    task lint         (Checkstyle Google Style)"
+        echo "    task semgrep:scan (SAST OWASP + Java + secrets)"
+        echo "    task trivy:scan   (CVE image Docker)"
+        echo ""
+        echo "  Tâches disponibles :"
+        echo ""
+        task --list
+
+  # ── Prérequis ─────────────────────────────────────────────────────────────
+  check:
+    desc: "Vérifier que tous les outils requis sont disponibles (alias check-tools)"
+    cmds:
+      - task: check-tools
+
+  check-tools:
+    desc: "Vérifier que tous les outils requis sont disponibles dans le PATH"
+    silent: true
+    cmds:
+      - |
+        PASS=true
+
+        check_tool() {
+          local BIN="$1" HINT="$2"
+          printf "  %-16s" "$BIN"
+          if command -v "$BIN" >/dev/null 2>&1; then
+            echo "OK  $(command -v "$BIN")"
+          else
+            echo "MANQUANT — $HINT"
+            PASS=false
+          fi
+        }
+
+        echo ""
+        echo "=== Outils requis ==="
+        check_tool bash      "Git Bash requis — https://git-scm.com/downloads"
+        check_tool git       "https://git-scm.com/downloads"
+        check_tool java      "JDK 21+ Temurin — https://adoptium.net"
+        check_tool mvn       "Maven 3.9.x — https://maven.apache.org"
+        check_tool docker    "Docker Desktop — https://docker.com"
+        check_tool kubectl   "https://kubernetes.io/docs/tasks/tools/"
+        check_tool kustomize "choco install kustomize"
+        check_tool task      "https://taskfile.dev/installation/"
+
+        echo ""
+        echo "=== Contexte actif (.env) ==="
+        echo "  ENV              = {{.ENV}}  (défaut: dev — surcharger dans .env)"
+        echo "  NAMESPACE        = {{.NAMESPACE}}  (fixe — tous les envs)"
+        echo "  KUBE_CONTEXT     = {{.KUBE_CONTEXT}}"
+        echo "  HARBOR_REGISTRY  = ${HARBOR_REGISTRY:-<non défini>}"
+        echo "  IMAGE_TAG        = ${IMAGE_TAG:-<non défini — requis pour qa/prod>}"
+        echo "  DB_HOST          = ${DB_HOST:-<non défini>}"
+
+        echo ""
+        echo "=== Versions ==="
+        java -version 2>&1 | head -1
+        mvn -version 2>/dev/null | head -1
+        docker version --format 'Docker {{.Server.Version}}' 2>/dev/null || echo "(Docker non démarré)"
+        kubectl version --client 2>/dev/null | head -1
+        task --version
+
+        echo ""
+        if [ "$PASS" = "true" ]; then
+          echo "Tous les outils requis sont disponibles"
+        else
+          echo "Des outils sont manquants — voir ci-dessus"
+          exit 1
+        fi
+
+  # ── Build ──────────────────────────────────────────────────────────────────
+  compile:
+    desc: "Compile sans tests (rapide)"
+    cmds:
+      - "{{.MVN}} compile -q"
 
   build:
-    desc: "Compile + tous les tests + JaCoCo 70%/60%"
+    desc: "Compile + tests + JaCoCo (70%/60% requis)"
     cmds:
-      - mvn verify
+      - "{{.MVN}} verify"
 
   test:
-    desc: "Exécuter les tests uniquement"
+    desc: "Exécuter les tests avec couverture JaCoCo"
     cmds:
-      - mvn test
+      - "{{.MVN}} test"
 
   lint:
-    desc: "Checkstyle Google Java Style"
+    desc: "Checkstyle Google Style"
     cmds:
-      - mvn checkstyle:check
+      - "{{.MVN}} checkstyle:check -q"
 
   coverage:
-    desc: "Ouvrir le rapport JaCoCo"
+    desc: "Ouvrir le rapport de couverture JaCoCo"
     cmds:
       - cmd: start target/site/jacoco/index.html
         platforms: [windows]
@@ -38,75 +142,102 @@ tasks:
       - cmd: xdg-open target/site/jacoco/index.html
         platforms: [linux]
 
-  semgrep:scan:
-    desc: "Scanner SAST avec Semgrep"
+  clean:
+    desc: "Nettoyer le répertoire target/"
     cmds:
-      - semgrep --config .semgrep.yml src/main/java/ --error
+      - "{{.MVN}} clean"
 
-  docker:build:
-    desc: "Construire l'image Docker locale avec attestations SBOM"
-    deps: [semgrep:scan]
+  # ── Docker ─────────────────────────────────────────────────────────────────
+  docker:
+    desc: "Build image Docker locale (tag: local)"
     cmds:
-      - mvn package -DskipTests -q
-      - docker buildx build
-          --sbom=true
-          --provenance=mode=max
-          --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          --label "org.opencontainers.image.revision=$(git rev-parse --short HEAD)"
-          --load
-          -t {{.IMAGE_REGISTRY}}:local
-          .
+      - task: semgrep:scan
+      - docker buildx build --sbom=true --provenance=mode=max -t {{.IMAGE}}:local --load .
 
   docker:push:
-    desc: "Push l'image vers Harbor avec tag commit"
+    desc: "Push image vers Harbor avec tag commit SHA"
     cmds:
-      - docker buildx build
-          --sbom=true
-          --provenance=mode=max
-          --label "org.opencontainers.image.revision=$(git rev-parse --short HEAD)"
-          --push
-          -t {{.IMAGE_REGISTRY}}:$(git rev-parse --short HEAD)
-          -t {{.IMAGE_REGISTRY}}:latest
-          .
-
-  docker:
-    desc: "Alias pour docker:build"
-    deps: [docker:build]
-
-  k8s-dev:
-    desc: "Dry-run Kustomize overlay dev"
-    cmds:
-      - kustomize build kustomize/overlays/dev | kubectl apply --dry-run=client -f -
-
-  k8s-prod:
-    desc: "Dry-run Kustomize overlay prod"
-    cmds:
-      - kustomize build kustomize/overlays/prod | kubectl apply --dry-run=client -f -
-
-  deploy-dev:
-    desc: "Déployer sur le cluster DEV"
-    cmds:
-      - kustomize build kustomize/overlays/dev | kubectl apply -f -
-      - kubectl rollout status deployment/{{.ARTIFACT_ID}} -n {{.NAMESPACE_DEV}} --timeout=300s
-
-  deploy-prod:
-    desc: "Déployer sur le cluster PROD (interactif)"
-    cmds:
-      - echo "Deploying {{.ARTIFACT_ID}} to PROD — make sure KUBECONFIG_PROD is set"
-      - kustomize build kustomize/overlays/prod | kubectl apply -f -
-      - kubectl rollout status deployment/{{.ARTIFACT_ID}} -n isp-app --timeout=600s
-
-  run:
-    desc: "Démarrer localement avec profil dev (nécessite .env configuré)"
-    cmds:
-      - mvn spring-boot:run -Dspring-boot.run.profiles=dev
-
-  clean:
-    desc: "Nettoyer le build Maven"
-    cmds:
-      - mvn clean
+      - |
+        TAG=$(git rev-parse --short HEAD)
+        docker login ${HARBOR_REGISTRY:-harbor.internal.korlu.com} -u ${HARBOR_USER} -p ${HARBOR_PASS}
+        docker buildx build --sbom=true --provenance=mode=max \
+          -t {{.IMAGE}}:${TAG} \
+          -t {{.IMAGE}}:latest \
+          --push .
 
   trivy:scan:
-    desc: "Scan CVE Trivy sur l'image locale"
+    desc: "Scanner l'image avec Trivy (CRITICAL bloque, HIGH documente)"
     cmds:
-      - trivy image --severity CRITICAL,HIGH {{.IMAGE_REGISTRY}}:local
+      - trivy image --severity CRITICAL,HIGH --exit-code 1 {{.IMAGE}}:local
+
+  semgrep:scan:
+    desc: "Analyse statique Semgrep (OWASP, Java/Spring, K8s, Dockerfile, secrets)"
+    silent: true
+    cmds:
+      - |
+        SEMGREP_BIN=""
+        if command -v semgrep >/dev/null 2>&1; then
+          SEMGREP_BIN="semgrep"
+        else
+          APPDATA_UNIX="$(cygpath "$APPDATA" 2>/dev/null || echo "")"
+          if [ -n "$APPDATA_UNIX" ]; then
+            for PY_VER in Python314 Python313 Python312 Python311 Python310; do
+              CANDIDATE="$APPDATA_UNIX/Python/$PY_VER/Scripts/semgrep"
+              if [ -x "$CANDIDATE" ]; then
+                SEMGREP_BIN="$CANDIDATE"
+                break
+              fi
+            done
+          fi
+        fi
+        if [ -z "$SEMGREP_BIN" ]; then
+          echo "ERREUR: semgrep introuvable. Installation : pip install semgrep"
+          exit 1
+        fi
+        echo "Semgrep SAST — {{.SERVICE}}"
+        PYTHONUTF8=1 $SEMGREP_BIN scan \
+          --config p/owasp-top-ten \
+          --config p/cwe-top-25 \
+          --config p/security-audit \
+          --config p/java \
+          --config p/kubernetes \
+          --config p/dockerfile \
+          --config p/secrets \
+          --config p/default \
+          --error \
+          --include="*.java" \
+          --include="*.yml" \
+          --include="*.yaml" \
+          --include="Dockerfile" \
+          .
+        echo "Semgrep: aucune faille critique detectee."
+  # ── Kubernetes ─────────────────────────────────────────────────────────────
+  k8s:
+    desc: "Dry-run Kustomize overlay ENV actif (défaut: dev)"
+    cmds:
+      - "{{{{.KUSTOMIZE}}}} build kustomize/overlays/{{{{.ENV}}}} | kubectl apply --dry-run=client --context={{{{.KUBE_CONTEXT}}}} -f -"
+
+  deploy:
+    desc: "Deploy K8s overlay ENV actif (défaut: dev) — qa/prod: définir ENV + IMAGE_TAG dans .env"
+    silent: true
+    cmds:
+      - |
+        echo "Deploy — ENV={{{{.ENV}}}}  NAMESPACE={{{{.NAMESPACE}}}}  CONTEXT={{{{.KUBE_CONTEXT}}}}"
+        if [ "{{{{.ENV}}}}" != "dev" ]; then
+          if [ -z "${{IMAGE_TAG}}" ]; then
+            echo "ERREUR: IMAGE_TAG non défini — ajouter IMAGE_TAG=<sha> dans .env"
+            exit 1
+          fi
+          echo "Mise à jour image tag → ${{IMAGE_TAG}}..."
+          (cd kustomize/overlays/{{{{.ENV}}}} && {{{{.KUSTOMIZE}}}} edit set image \
+            {{{{.IMAGE}}}}={{{{.IMAGE}}}}:${{IMAGE_TAG}})
+        fi
+        echo "Apply Kustomize overlay {{{{.ENV}}}}..."
+        {{{{.KUSTOMIZE}}}} build kustomize/overlays/{{{{.ENV}}}} | kubectl apply -f - --context="{{{{.KUBE_CONTEXT}}}}"
+        kubectl rollout status deployment/{{{{.SERVICE}}}} -n {{{{.NAMESPACE}}}} --timeout=300s --context="{{{{.KUBE_CONTEXT}}}}"
+        echo "Deploy {{{{.ENV}}}} terminé."
+
+  run:
+    desc: "Lancer localement avec le profil Spring = ENV actif (défaut: dev)"
+    cmds:
+      - "SPRING_PROFILES_ACTIVE={{{{.ENV}}}} {{{{.MVN}}}} spring-boot:run"
