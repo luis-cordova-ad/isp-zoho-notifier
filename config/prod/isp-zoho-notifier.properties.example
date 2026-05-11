@@ -1,3 +1,10 @@
+# =============================================================================
+# config/prod/isp-zoho-notifier.properties — Configuration PROD (gitignored)
+#
+# Valeurs applicatives non-sensibles pour l'environnement PROD K8s.
+# Secrets (Zoho tokens, DB passwords, RabbitMQ passwords) → secrets/prod/*.yaml
+# =============================================================================
+
 KEYCLOAK_ISSUER_URI=https://iam.internal.korlu.com/realms/isp
 KEYCLOAK_JWK_SET_URI=http://keycloak.isp-iam.svc.cluster.local/realms/isp/protocol/openid-connect/certs
 SPRING_PROFILES_ACTIVE=prod
@@ -5,13 +12,13 @@ GRAYLOG_GELF_HOST=graylog.graylog.svc.cluster.local
 GRAYLOG_GELF_PORT=12201
 RABBITMQ_HOST=rabbitmq.isp-messaging.svc.cluster.local
 RABBITMQ_PORT=5672
-DB_HOST=svc-data-persistence.isp-app.svc.cluster.local
+DB_HOST=proxysql.svc-data-persistence.svc.cluster.local
 DB_PORT=6033
 DB_NAME=freeradius_db
 DB_USER=isp_zoho_notifier
 ZOHO_API_BASE_URL=https://www.zohoapis.com
 ZOHO_AUTH_URL=https://accounts.zoho.com
-ZOHO_WEBHOOK_ENABLED=false
-ZOHO_RETRY_MAX_ATTEMPTS=3
-ZOHO_RETRY_INITIAL_WAIT_MS=2000
+ZOHO_WEBHOOK_ENABLED=true
+ZOHO_RETRY_MAX_ATTEMPTS=5
+ZOHO_RETRY_INITIAL_WAIT_MS=5000
 KUBERNETES_NAMESPACE=isp-app

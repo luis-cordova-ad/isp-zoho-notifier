@@ -29,7 +29,9 @@ Persist result + Graylog audit
 
 ```bash
 cp .env.example .env
-# Remplir ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_REFRESH_TOKEN dans .env
+# .env contient uniquement ENV=dev|qa|preprod|prod
+# Configuration non-sensible: config/{ENV}/global.properties + config/{ENV}/isp-zoho-notifier.properties
+# Secrets: secrets/{ENV}/ (hors kustomize)
 task run
 ```
 

@@ -1,4 +1,4 @@
-﻿package com.isp.zoho.notifier.integration;
+package com.isp.zoho.notifier.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;

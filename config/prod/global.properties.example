@@ -1,0 +1,12 @@
+# =============================================================================
+# config/prod/global.properties — Infrastructure PROD (gitignored)
+# =============================================================================
+
+# ── Contexte Kubernetes ───────────────────────────────────────────────────────
+KUBE_CONTEXT=kubernetes-admin@kubernetes
+
+# ── Harbor Registry ───────────────────────────────────────────────────────────
+HARBOR_REGISTRY=harbor.internal.korlu.com
+HARBOR_PROJECT=korlu
+HARBOR_USER='robot$robot-cicd-01'
+HARBOR_PASS=change_me

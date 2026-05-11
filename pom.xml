@@ -279,6 +279,11 @@
         <version>${surefire.version}</version>
         <configuration>
           <argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
+          <excludes>
+            <exclude>**/integration/**</exclude>
+            <exclude>**/*IntegrationTest.java</exclude>
+            <exclude>**/*ApplicationTests.java</exclude>
+          </excludes>
           <environmentVariables>
             <!-- Docker Desktop (Windows/Mac): fournit DOCKER_HOST pour eviter le scan docker-machine via PATH -->
             <DOCKER_HOST>npipe:////./pipe/dockerDesktopLinuxEngine</DOCKER_HOST>

@@ -25,11 +25,15 @@ jobs:
 
       - name: Determine image tag
         id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "TAG=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "TAG=$INPUT_IMAGE_TAG" >> "$GITHUB_OUTPUT"
           else
-            echo "TAG=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+            echo "TAG=$WORKFLOW_RUN_SHA" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Setup kubectl

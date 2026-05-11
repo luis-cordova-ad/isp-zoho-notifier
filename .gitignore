@@ -24,3 +24,8 @@ Thumbs.db
 logs/
 
 config/*/*.properties
+
+# secrets/ : seuls les templates *.template.yaml + README.md sont versionnés.
+secrets/**/*.yaml
+!secrets/**/*.template.yaml
+!secrets/README.md

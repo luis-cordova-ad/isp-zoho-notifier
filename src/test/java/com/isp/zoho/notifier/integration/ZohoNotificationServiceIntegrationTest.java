@@ -1,4 +1,4 @@
-﻿package com.isp.zoho.notifier.integration;
+package com.isp.zoho.notifier.integration;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;

@@ -17,8 +17,10 @@ jobs:
     steps:
       - name: Check confirmation
         if: inputs.confirmation != 'DEPLOY'
+        env:
+          INPUT_CONFIRMATION: ${{ inputs.confirmation }}
         run: |
-          echo "ERROR: You must type 'DEPLOY' to confirm production deployment. Got: '${{ inputs.confirmation }}'"
+          echo "ERROR: You must type 'DEPLOY' to confirm production deployment. Got: '$INPUT_CONFIRMATION'"
           exit 1
 
   deploy-prod:
@@ -45,8 +47,10 @@ jobs:
 
       - name: Update image tag
         working-directory: kustomize/overlays/prod
+        env:
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          kustomize edit set image harbor.isp.local/isp-prod/isp-zoho-notifier=harbor.isp.local/isp-prod/isp-zoho-notifier:${{ inputs.image_tag }}
+          kustomize edit set image harbor.isp.local/isp-prod/isp-zoho-notifier=harbor.isp.local/isp-prod/isp-zoho-notifier:$INPUT_IMAGE_TAG
 
       - name: Apply kustomize PROD
         run: kustomize build kustomize/overlays/prod | kubectl apply -f -

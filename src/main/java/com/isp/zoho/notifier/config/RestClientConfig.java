@@ -1,4 +1,4 @@
-﻿package com.isp.zoho.notifier.config;
+package com.isp.zoho.notifier.config;
 
 import java.time.Duration;
 import org.springframework.context.annotation.Bean;

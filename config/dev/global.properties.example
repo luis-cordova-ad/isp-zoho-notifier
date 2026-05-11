@@ -1,0 +1,30 @@
+# =============================================================================
+# config/dev/global.properties — Infrastructure DEV (gitignored)
+#
+# Ce fichier est gitignored — NE PAS committer le fichier sans le suffixe .example.
+# Initialisation : cp global.properties.example global.properties
+#                  puis remplir les credentials Harbor.
+#
+# Contenu : valeurs d'infrastructure communes à tous les services de l'env DEV
+#           (Harbor, K8s context).
+#           Les credentials applicatifs (DB passwords, tokens) sont dans les fichiers
+#           isp-{service}.properties et secrets/dev/.
+# =============================================================================
+
+# ── Contexte Kubernetes ───────────────────────────────────────────────────────
+# Contexte kubectl actif pour cet environnement.
+# Lister les contextes disponibles : kubectl config get-contexts
+KUBE_CONTEXT=kubernetes-admin@kubernetes
+
+# ── Harbor Registry ───────────────────────────────────────────────────────────
+# URL du registre Harbor interne (même valeur pour tous les envs).
+HARBOR_REGISTRY=harbor.internal.korlu.com
+
+# Projet Harbor cible pour l'env DEV.
+HARBOR_PROJECT=korlu
+
+# Nom du compte robot Harbor avec droits push/pull sur HARBOR_PROJECT.
+HARBOR_USER='robot$robot-cicd-01'
+
+# Mot de passe du compte robot Harbor (JAMAIS committer — charger depuis secret).
+HARBOR_PASS=change_me

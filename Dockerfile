@@ -23,13 +23,13 @@ RUN java -Djarmode=layertools \
          --destination extracted
 
 # ── Stage 2 : Runtime — Golden Java 25 Runtime Base ────────────────────────────
-FROM harbor.internal.korlu.com/korlu/java-runtime-base:25-jammy-1.0.0
+FROM harbor.internal.korlu.com/korlu/java-runtime-base@sha256:d6386efab96304a018271c71261358d84f7099dfacea742a549dbf9e6239b6ae
 
 LABEL org.opencontainers.image.title="isp-zoho-notifier"
 LABEL org.opencontainers.image.description="isp-zoho-notifier — ISP Platform AMQP worker Zoho CRM"
 LABEL org.opencontainers.image.vendor="Korlu ISP Platform"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
-LABEL org.opencontainers.image.base.name="harbor.internal.korlu.com/korlu/java-runtime-base:25-jammy-1.0.0"
+LABEL org.opencontainers.image.base.name="harbor.internal.korlu.com/korlu/java-runtime-base@sha256:d6386efab96304a018271c71261358d84f7099dfacea742a549dbf9e6239b6ae"
 
 WORKDIR /app
 
